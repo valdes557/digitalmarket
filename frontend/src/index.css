@@ -127,19 +127,3 @@
   @apply bg-muted animate-pulse rounded;
 }
 
-/* Hide all pseudo-element watermarks */
-*::before,
-*::after {
-  content: var(--tw-content) !important;
-}
-
-section.relative *::before,
-section.relative *::after,
-.gradient-primary *::before,
-.gradient-primary *::after {
-  display: none !important;
-  content: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  position: static !important;
-}
