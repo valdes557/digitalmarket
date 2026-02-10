@@ -62,7 +62,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 gradient-primary opacity-90" />
-        {heroBanner?.image && (
+        {heroBanner?.image && !heroBanner.image.includes('placehold') && (
           <img src={heroBanner.image} alt="" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay" />
         )}
         <div className="relative container mx-auto px-4 py-20 md:py-32">
