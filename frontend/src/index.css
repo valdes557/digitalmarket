@@ -126,3 +126,10 @@
 .skeleton {
   @apply bg-muted animate-pulse rounded;
 }
+
+/* Hide watermark */
+.gradient-primary::before,
+.gradient-primary::after {
+  display: none !important;
+  content: none !important;
+}
