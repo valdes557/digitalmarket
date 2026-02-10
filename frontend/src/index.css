@@ -129,7 +129,15 @@
 
 /* Hide watermark */
 .gradient-primary::before,
-.gradient-primary::after {
+.gradient-primary::after,
+section.relative::before,
+section.relative::after,
+section.relative > div::before,
+section.relative > div::after,
+[class*="gradient"]::before,
+[class*="gradient"]::after {
   display: none !important;
   content: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
