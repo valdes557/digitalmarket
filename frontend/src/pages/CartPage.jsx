@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ShoppingCart, Trash2, ArrowRight, ShoppingBag, Loader2 } from 'lucide-react';
+import { ShoppingCart, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Separator } from '../components/ui/separator';
@@ -9,17 +9,9 @@ import { useAuthStore } from '../stores/authStore';
 import { formatPrice } from '../lib/utils';
 
 export default function CartPage() {
-  const { items, removeItem, clearCart, getTotal, _hasHydrated } = useCartStore();
+  const { items, removeItem, clearCart, getTotal } = useCartStore();
   const { isAuthenticated } = useAuthStore();
   const total = getTotal();
-
-  if (!_hasHydrated) {
-    return (
-      <div className="container mx-auto px-4 py-16 flex justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   if (!items || items.length === 0) {
     return (
