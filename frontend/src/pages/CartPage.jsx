@@ -43,7 +43,7 @@ export default function CartPage() {
   return (
     <>
       <Helmet>
-        <title>Panier ({items.length}) - DigitalMarket</title>
+        <title>{`Panier (${items.length}) - DigitalMarket`}</title>
       </Helmet>
 
       <div className="container mx-auto px-4 py-8">
