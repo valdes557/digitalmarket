@@ -9,7 +9,7 @@ const router = express.Router();
 const productValidation = [
   body('name').notEmpty().withMessage('Le nom du produit est requis'),
   body('price').isFloat({ min: 0 }).withMessage('Prix invalide'),
-  body('category_id').isInt().withMessage('Catégorie invalide')
+  body('category_id').notEmpty().withMessage('Catégorie requise')
 ];
 
 // Public routes

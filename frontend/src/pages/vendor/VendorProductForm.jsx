@@ -1,31 +1,56 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, Plus } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog';
 import { productsAPI, categoriesAPI, uploadAPI } from '../../lib/api';
 import toast from 'react-hot-toast';
 
 export default function VendorProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [thumbnail, setThumbnail] = useState('');
   const [files, setFiles] = useState([]);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   const { register, handleSubmit, setValue, watch } = useForm();
 
-  const { data: categories } = useQuery({
+  const { data: categories, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => categoriesAPI.getAll().then(res => res.data),
   });
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Entrez un nom de catégorie');
+      return;
+    }
+    setIsCreatingCategory(true);
+    try {
+      const response = await categoriesAPI.create({ name: newCategoryName });
+      toast.success('Catégorie créée !');
+      setNewCategoryName('');
+      setShowCategoryDialog(false);
+      await refetchCategories();
+      setValue('category_id', response.data.category._id);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Erreur lors de la création');
+    } finally {
+      setIsCreatingCategory(false);
+    }
+  };
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -105,14 +130,46 @@ export default function VendorProductForm() {
               </div>
               <div>
                 <Label>Catégorie *</Label>
-                <Select onValueChange={(v) => setValue('category_id', v)}>
-                  <SelectTrigger><SelectValue placeholder="Choisir une catégorie" /></SelectTrigger>
-                  <SelectContent>
-                    {categories?.map((cat) => (
-                      <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select onValueChange={(v) => setValue('category_id', v)}>
+                    <SelectTrigger className="flex-1"><SelectValue placeholder="Choisir une catégorie" /></SelectTrigger>
+                    <SelectContent>
+                      {categories?.map((cat) => (
+                        <SelectItem key={cat.id || cat._id} value={String(cat.id || cat._id)}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
+                    <DialogTrigger asChild>
+                      <Button type="button" variant="outline" size="icon">
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Créer une catégorie</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 pt-4">
+                        <div>
+                          <Label>Nom de la catégorie</Label>
+                          <Input 
+                            value={newCategoryName} 
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            placeholder="Ex: Templates WordPress"
+                          />
+                        </div>
+                        <Button 
+                          onClick={handleCreateCategory} 
+                          disabled={isCreatingCategory}
+                          className="w-full"
+                        >
+                          {isCreatingCategory && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                          Créer la catégorie
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -1,10 +1,18 @@
+import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { Loader2 } from 'lucide-react';
 
 export default function VendorRoute({ children }) {
-  const { isAuthenticated, isLoading, user, vendor } = useAuthStore();
+  const { isAuthenticated, isLoading, user, vendor, checkAuth } = useAuthStore();
   const location = useLocation();
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token && !isAuthenticated && !isLoading) {
+      checkAuth();
+    }
+  }, [isAuthenticated, isLoading, checkAuth]);
 
   if (isLoading) {
     return (

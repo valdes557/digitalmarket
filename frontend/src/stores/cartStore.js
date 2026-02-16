@@ -1,25 +1,43 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
+      _hasHydrated: false,
+      
+      setHasHydrated: (state) => {
+        set({ _hasHydrated: state });
+      },
       
       addItem: (product) => {
-        const items = get().items;
-        const exists = items.find((item) => item.id === product.id);
+        const items = get().items || [];
+        const productId = product.id || product._id;
+        const exists = items.find((item) => (item.id || item._id) === productId);
         
         if (exists) {
-          return false; // Product already in cart
+          return false;
         }
         
-        set({ items: [...items, product] });
+        const cartItem = {
+          id: productId,
+          _id: productId,
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          sale_price: product.sale_price,
+          thumbnail: product.thumbnail,
+          store_name: product.store_name
+        };
+        
+        set({ items: [...items, cartItem] });
         return true;
       },
       
       removeItem: (productId) => {
-        set({ items: get().items.filter((item) => item.id !== productId) });
+        const items = get().items || [];
+        set({ items: items.filter((item) => (item.id || item._id) !== productId) });
       },
       
       clearCart: () => {
@@ -27,21 +45,28 @@ export const useCartStore = create(
       },
       
       getTotal: () => {
-        return get().items.reduce((total, item) => {
-          return total + (item.sale_price || item.price);
+        const items = get().items || [];
+        return items.reduce((total, item) => {
+          return total + (item.sale_price || item.price || 0);
         }, 0);
       },
       
       getCount: () => {
-        return get().items.length;
+        const items = get().items || [];
+        return items.length;
       },
       
       hasItem: (productId) => {
-        return get().items.some((item) => item.id === productId);
+        const items = get().items || [];
+        return items.some((item) => (item.id || item._id) === productId);
       },
     }),
     {
       name: 'cart-storage',
+      storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

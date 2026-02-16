@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
-import { Users, Store, Package, ShoppingCart, DollarSign, TrendingUp } from 'lucide-react';
+import { Users, Store, Package, ShoppingCart, DollarSign, TrendingUp, Wallet, ArrowDownCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { adminAPI } from '../../lib/api';
 import { formatPrice } from '../../lib/utils';
@@ -9,6 +9,7 @@ export default function AdminDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-dashboard'],
     queryFn: () => adminAPI.getDashboard().then(res => res.data),
+    refetchInterval: 30000,
   });
 
   const stats = [
@@ -16,8 +17,8 @@ export default function AdminDashboard() {
     { title: 'Vendeurs', value: data?.stats?.vendors || 0, icon: Store, color: 'text-green-500' },
     { title: 'Produits', value: data?.stats?.products || 0, icon: Package, color: 'text-purple-500' },
     { title: 'Commandes', value: data?.stats?.orders || 0, icon: ShoppingCart, color: 'text-orange-500' },
-    { title: 'Revenus', value: formatPrice(data?.stats?.revenue || 0), icon: DollarSign, color: 'text-green-600' },
-    { title: 'Commissions', value: formatPrice(data?.stats?.commission || 0), icon: TrendingUp, color: 'text-primary' },
+    { title: 'Revenus totaux', value: formatPrice(data?.stats?.revenue || 0), icon: DollarSign, color: 'text-green-600' },
+    { title: 'Mes Commissions', value: formatPrice(data?.stats?.commission || 0), icon: TrendingUp, color: 'text-primary' },
   ];
 
   return (
@@ -57,7 +58,11 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex justify-between p-3 bg-muted rounded">
                   <span>Retraits en attente</span>
-                  <span className="font-bold">{data?.stats?.pendingWithdrawals?.count || 0}</span>
+                  <span className="font-bold text-orange-500">{data?.stats?.pendingWithdrawals?.count || 0}</span>
+                </div>
+                <div className="flex justify-between p-3 bg-primary/10 rounded">
+                  <span>Montant retraits en attente</span>
+                  <span className="font-bold text-primary">{formatPrice(data?.stats?.pendingWithdrawals?.total || 0)}</span>
                 </div>
               </div>
             </CardContent>
